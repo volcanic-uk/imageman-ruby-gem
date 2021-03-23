@@ -14,8 +14,10 @@ jobs:
     - uses: actions/setup-ruby@v1
       with:
         ruby-version: '2.5'
-    - name: Install dependencies
+    - name: Install bundler
       run: gem install bundler:1.16.6 -N
+    - name: Install dependencies
+      run: bundle install
     - name: Rubocop
       run: rubocop
     - name: Run tests
