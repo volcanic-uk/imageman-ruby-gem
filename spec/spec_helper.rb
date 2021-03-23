@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 require 'bundler/setup'
+require 'rspec/its'
+require 'json'
 require 'volcanic/imageman'
+require 'tempfile'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -12,5 +15,15 @@ RSpec.configure do |config|
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
+  end
+
+  config.before do
+    # example of configuring Imageman client
+    Volcanic::Imageman.configure do |imageman|
+      imageman.domain_url = 'http://imageman-domain.com'
+      imageman.asset_image_url = 'http://asset-image-url.com'
+      imageman.service = 'test-service'
+      imageman.authentication = 'api_key'
+    end
   end
 end

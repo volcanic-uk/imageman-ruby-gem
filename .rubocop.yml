@@ -18,3 +18,8 @@ Metrics/ParameterLists:
 
 Style/ClassAndModuleChildren:
   Enabled: false
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    '%i':    '()'
+    '%w':    '()'
