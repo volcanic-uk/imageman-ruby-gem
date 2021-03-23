@@ -65,7 +65,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.16)
+  bundler
   pry
   rake (~> 13.0)
   rspec (~> 3.0)
@@ -74,4 +74,4 @@ DEPENDENCIES
   volcanic-imageman!
 
 BUNDLED WITH
-   1.16.6
+   1.17.3
