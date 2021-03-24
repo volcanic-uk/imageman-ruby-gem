@@ -10,13 +10,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-ruby@v1
-      with:
-        ruby-version: '2.5'
-    - name: Install dependencies
-      run: bundle install
-    - name: Rubocop
-      run: rubocop
-    - name: Run tests
-      run: bundle exec rake
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.5'
+          bundler-cache: true
+      - name: Rubocop
+        run: bundle exec rubocop
+      - name: Spec
+        run: bundle exec rake
+
