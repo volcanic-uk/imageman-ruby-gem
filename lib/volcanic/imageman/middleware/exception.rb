@@ -9,10 +9,16 @@ module Volcanic::Imageman::Middleware
       @app = app
     end
 
-    def call(env)
-      @app.call(env).on_complete do |response|
-        case response[:status].to_i
-        when 400..410
+    def call(request_env)
+      @app.call(request_env).on_complete do |response|
+        status_code = response[:status].to_i
+        case status_code
+        when 400
+          error_code = standard_error(response)[:error_code]
+          raise Volcanic::Imageman::DuplicateImage, standard_error(response) if error_code == 1002
+
+          raise Volcanic::Imageman::ImageError, standard_error(response)
+        when 401..410
           raise Volcanic::Imageman::ImageError, standard_error(response)
         when 500
           raise Volcanic::Imageman::ServerError, server_error(response)

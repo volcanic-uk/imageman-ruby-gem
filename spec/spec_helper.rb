@@ -4,6 +4,7 @@ require 'bundler/setup'
 require 'rspec/its'
 require 'json'
 require 'volcanic/imageman'
+require 'base64'
 require 'tempfile'
 
 RSpec.configure do |config|
@@ -19,11 +20,11 @@ RSpec.configure do |config|
 
   config.before do
     # example of configuring Imageman client
-    Volcanic::Imageman.configure do |imageman|
-      imageman.domain_url = 'http://imageman-domain.com'
-      imageman.asset_image_url = 'http://asset-image-url.com'
-      imageman.service = 'test-service'
-      imageman.authentication = 'api_key'
+    Volcanic::Imageman.configure do |configure|
+      configure.domain_url = 'http://imageman-domain.com'
+      configure.asset_image_url = 'http://asset-image-url.com'
+      configure.service = 'test-service'
+      configure.authentication = 'api_key'
     end
   end
 end

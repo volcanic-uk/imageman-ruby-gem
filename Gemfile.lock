@@ -4,6 +4,7 @@ PATH
     volcanic-imageman (0.1.0)
       faraday (~> 1.0)
       faraday_middleware (~> 1.0)
+      marcel (~> 0.3.1)
 
 GEM
   remote: https://rubygems.org/
@@ -18,7 +19,10 @@ GEM
     faraday-net_http (1.0.1)
     faraday_middleware (1.0.0)
       faraday (~> 1.0)
+    marcel (0.3.3)
+      mimemagic (~> 0.3.2)
     method_source (1.0.0)
+    mimemagic (0.3.5)
     multipart-post (2.1.1)
     parallel (1.20.1)
     parser (3.0.0.0)

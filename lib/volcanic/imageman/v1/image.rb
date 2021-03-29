@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-require 'base64'
 require_relative '../helper/connection_helper'
 require_relative '../helper/serialize_helper'
+require_relative 'image_class_method'
 
 # Image class
 class Volcanic::Imageman::V1::Image
   include Volcanic::Imageman::ConnectionHelper
   include Volcanic::Imageman::SerializeHelper
+  extend Volcanic::Imageman::Image::ClassMethod
 
   UPDATABLE_ATTR = %i(name cacheable cache_duration).freeze
   NON_UPDATABLE_ATTR = %i(id reference uuid creator_subject versions created_at updated_at).freeze
@@ -15,56 +16,6 @@ class Volcanic::Imageman::V1::Image
 
   attr_accessor(*UPDATABLE_ATTR)
   attr_reader(*NON_UPDATABLE_ATTR)
-
-  class << self
-    def create(attachable:, reference: nil, name: nil, cache_duration: nil, cacheable: true)
-      img_ref, img_name = resolve_details(reference, name)
-      new(
-        name: img_name,
-        reference: img_ref,
-        cache_duration: cache_duration,
-        cacheable: cacheable
-      ).tap do |img|
-        img._upload_and_create(attachable)
-      end
-    end
-
-    def fetch_by(reference: nil, uuid: nil)
-      validate_persisted_var(reference, uuid)
-      new(reference: resolve_reference(reference), uuid: uuid).tap(&:reload)
-    end
-
-    def update(attachable:, reference: nil, uuid: nil)
-      validate_persisted_var(reference, uuid)
-      new(reference: resolve_reference(reference), uuid: uuid).update_file(attachable)
-    end
-
-    def delete(reference: nil, uuid: nil)
-      validate_persisted_var(reference, uuid)
-      new(reference: resolve_reference(reference), uuid: uuid).delete
-    end
-
-    private
-
-    def validate_persisted_var(ref, uuid)
-      raise ArgumentError, 'Expect either reference or uuid, both got nil' if ref.nil? && uuid.nil?
-    end
-
-    def resolve_details(ref, name)
-      if ref.is_a? Volcanic::Imageman::V1::Reference
-        [ref.md5_hash, name || ref.name]
-      else
-        raise ArgumentError, 'Expected a value of name' unless name
-        raise ArgumentError, 'Expected a value of reference' unless ref
-
-        [ref, name]
-      end
-    end
-
-    def resolve_reference(ref)
-      ref.is_a?(Volcanic::Imageman::V1::Reference) ? ref.md5_hash : ref
-    end
-  end
 
   def initialize(**attrs)
     write_self(attrs)
@@ -74,7 +25,7 @@ class Volcanic::Imageman::V1::Image
     return false unless persisted?
 
     res = conn.get(persisted_path)
-    write_self(serialize_img(res.body)) && true
+    write_self(serialize_img(res.body))
   end
 
   def delete
@@ -83,10 +34,17 @@ class Volcanic::Imageman::V1::Image
     conn.delete(persisted_path) && true
   end
 
-  def update_file(attachable)
+  def update(attachable = nil, using_signed_url: false, declared_type: nil, **opts)
     return false unless persisted?
 
-    conn.post(persisted_path) { |req| req.body = { file: resolve_file(attachable) } }
+    file = attachable.nil? ? nil : resolve_file(attachable, declared_type)
+    body = { reference: nil, path: persisted_path, **opts }
+    if using_signed_url || exceed_byte_size(file&.size_at_base64)
+      path = fetch_signed_url(type: file&.content_type, **body)
+      create_update_to_signed_url(path, file)
+    else
+      create_or_update(path: persisted_path, file: file&.read_as_base64, **body)
+    end
     true
   end
 
@@ -95,18 +53,14 @@ class Volcanic::Imageman::V1::Image
   end
 
   # Dont use this method, use class method +create+ instead
-  def _upload_and_create(attachable)
-    file = resolve_file(attachable)
-    res = conn.post API_PATH do |req|
-      req.body = {
-        fileName: name,
-        file: file,
-        reference: reference,
-        cache_duration: cache_duration,
-        cacheable: cacheable
-      }.compact
+  def _upload_and_create(attachable, using_signed_url: false, declared_type: nil)
+    file = resolve_file(attachable, declared_type)
+    if using_signed_url || exceed_byte_size(file.size_at_base64)
+      path = fetch_signed_url(type: file.content_type)
+      create_update_to_signed_url(path, file)
+    else
+      create_or_update(file: file.read_as_base64)
     end
-    write_self(serialize_img(res.body))
   end
 
   private
@@ -117,25 +71,61 @@ class Volcanic::Imageman::V1::Image
     (UPDATABLE_ATTR + NON_UPDATABLE_ATTR).each do |key|
       send("#{key}=", attrs[key])
     end
+    true
   end
 
   def persisted_path
     "#{API_PATH}/#{uuid || reference}"
   end
 
-  # return base64 string
-  def resolve_file(attachable)
-    raise ArgumentError, 'Expect a value of attachable, got nil' if attachable.nil?
+  def resolve_file(attachable, declared_type = nil)
+    att = attachable
+    name = nil
+    type = declared_type
 
-    case attachable
-    when Hash
-      Base64.strict_encode64(attachable.fetch(:io)&.read)
-    else
-      if attachable.respond_to?('read')
-        Base64.strict_encode64(attachable.read)
-      else
-        attachable # a base64 file
-      end
+    if attachable.is_a?(Hash)
+      att = attachable.fetch(:io)
+      name = attachable[:filename]
+      type = attachable[:content_type] || declared_type
+    end
+
+    Volcanic::Imageman::V1::Attachable.new(att, filename: name, content_type: type)
+  end
+
+  def default_body
+    {
+      fileName: name,
+      reference: reference,
+      cache_duration: cache_duration,
+      cacheable: cacheable
+    }.compact
+  end
+
+  def exceed_byte_size(size)
+    return false unless size.is_a? Integer
+
+    size >= megabytes_of(6)
+  end
+
+  def megabytes_of(number)
+    number * 1024 * 1024
+  end
+
+  def fetch_signed_url(type:, **body)
+    create_or_update(sign_url_enable: true, content_type: type, **body).body[:signed_url]
+  end
+
+  def create_or_update(path: API_PATH, file: nil, **body)
+    response = conn.post(path) do |req|
+      req.body = default_body.merge(file: file, **body).compact
+    end
+    response.tap { |res| write_self(serialize_img(res.body)) }
+  end
+
+  def create_update_to_signed_url(path, file)
+    conn.put(path) do |req|
+      req.headers = { 'Content-Type' => file.content_type }
+      req.body = file.read
     end
   end
 end

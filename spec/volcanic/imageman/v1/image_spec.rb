@@ -17,12 +17,22 @@ RSpec.describe Volcanic::Imageman::V1::Image do
   let(:cache_duration) { nil }
   let(:mock_uuid) { 'uuid' }
 
+  let(:file) { Volcanic::Imageman::V1::Attachable }
   let(:conn) { Volcanic::Imageman::Connection }
   let(:response) { double 'response' }
-  let(:response_body) { { fileName: name, reference: reference, UUID: mock_uuid } }
+  let(:signed_url) {}
+  let(:response_body) do
+    {
+      fileName: name,
+      reference: reference,
+      UUID: mock_uuid,
+      signed_url: signed_url
+    }
+  end
 
   let(:image_error) { Volcanic::Imageman::ImageError }
   let(:server_error) { Volcanic::Imageman::ServerError }
+  let(:duplicates_error) { Volcanic::Imageman::DuplicateImage }
 
   before do
     allow(response).to receive(:body).and_return(response_body)
@@ -92,23 +102,43 @@ RSpec.describe Volcanic::Imageman::V1::Image do
       it('raises an exception') { expect { subject }.to raise_error image_error }
     end
 
+    context 'when failed request of Duplicates error (400)' do
+      before { allow_any_instance_of(conn).to receive(:post).with(anything).and_raise(duplicates_error) }
+      it('raises an exception') { expect { subject }.to raise_error duplicates_error }
+    end
+
     context 'when failed request of validation error (500)' do
       before { allow_any_instance_of(conn).to receive(:post).with(anything).and_raise(server_error) }
       it('raises an exception') { expect { subject }.to raise_error server_error }
+    end
+
+    context 'when image exceed limit' do
+      let(:signed_url) { 'http://s3-signed-url' }
+      before do
+        allow_any_instance_of(file).to receive(:size_at_base64).and_return(six_mb)
+        allow_any_instance_of(conn).to receive(:put).with(signed_url).and_return(true)
+      end
+
+      it('return an instance') { expect(subject).to be_an_instance_of(described_class) }
     end
   end
 
   describe 'fetch_by' do
     subject { described_class.fetch_by(attr) }
 
-    context 'with reference' do
+    context 'missing reference or uuid' do
+      let(:attr) { nil }
+      it('raises an exception') { expect { subject }.to raise_error(ArgumentError) }
+    end
+
+    context 'reference' do
       let(:attr) { { reference: reference } }
       its(:name) { should eq name }
       its(:reference) { should eq reference }
       its(:uuid) { should eq mock_uuid }
     end
 
-    context 'with uuid' do
+    context 'uuid' do
       let(:attr) { { uuid: mock_uuid } }
       its(:name) { should eq name }
       its(:reference) { should eq reference }
@@ -119,17 +149,17 @@ RSpec.describe Volcanic::Imageman::V1::Image do
   describe '#reload' do
     subject { instance.reload }
 
-    context 'if not persisted (both uuid and reference missing)' do
+    context 'when missing both uuid and reference (not persisted)' do
       let(:instance) { described_class.new }
       it('return false') { is_expected.to be false }
     end
 
-    context 'if persisted with reference exists' do
+    context 'when exists of reference' do
       let(:instance) { described_class.new(reference: reference) }
       it('return true') { is_expected.to be true }
     end
 
-    context 'if persisted with uuid exists' do
+    context 'when exists of uuid' do
       let(:instance) { described_class.new(uuid: mock_uuid) }
       it('return true') { is_expected.to be true }
     end
@@ -145,7 +175,7 @@ RSpec.describe Volcanic::Imageman::V1::Image do
 
   describe '#delete' do
     subject { instance.delete }
-    context 'if not persisted (both uuid and reference missing)' do
+    context 'when missing both uuid and reference (not persisted)' do
       let(:instance) { described_class.new }
       it('return false') { is_expected.to be false }
     end
@@ -156,11 +186,11 @@ RSpec.describe Volcanic::Imageman::V1::Image do
     end
   end
 
-  describe '#update_file' do
+  describe '#update' do
     let(:base64_string) { attachable }
-    subject { instance.update_file(base64_string) }
+    subject { instance.update(attachable: base64_string) }
 
-    context 'if not persisted (both uuid and reference missing)' do
+    context 'when missing both uuid and reference (not persisted)' do
       let(:instance) { described_class.new }
       it('return false') { is_expected.to be false }
     end
@@ -169,5 +199,21 @@ RSpec.describe Volcanic::Imageman::V1::Image do
       let(:instance) { described_class.new(uuid: mock_uuid) }
       it('return true') { is_expected.to be true }
     end
+
+    context 'when image exceed limit' do
+      let(:signed_url) { 'http://s3-signed-url' }
+      before do
+        allow_any_instance_of(file).to receive(:size_at_base64).and_return(six_mb)
+        allow_any_instance_of(conn).to receive(:put).with(signed_url).and_return(true)
+      end
+
+      it('return true') { is_expected.to be true }
+    end
+  end
+
+  private
+
+  def six_mb
+    6 * 1024 * 1024
   end
 end
