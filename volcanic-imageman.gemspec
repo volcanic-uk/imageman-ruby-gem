@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'faraday', '~> 1.0'
   spec.add_dependency 'faraday_middleware', '~> 1.0'
+  spec.add_dependency 'marcel', '~> 0.3.1'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'pry'

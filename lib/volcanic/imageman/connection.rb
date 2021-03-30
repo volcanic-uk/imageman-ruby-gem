@@ -14,7 +14,7 @@ module Volcanic::Imageman
     attr_accessor :conn
 
     def_delegators 'Volcanic::Imageman::Configuration'.to_sym, :domain_url
-    def_delegators :conn, :get, :post, :delete
+    def_delegators :conn, :get, :post, :delete, :put
 
     def initialize
       @conn = Faraday.new(url: domain_url) do |conn|

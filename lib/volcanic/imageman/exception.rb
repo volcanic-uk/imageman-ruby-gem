@@ -5,7 +5,10 @@ module Volcanic::Imageman
 
   class MissingConfiguration < ImagemanError; end
 
+  class ServerError < ImagemanError; end
+
+  # Related to image api
   class ImageError < ImagemanError; end
 
-  class ServerError < ImagemanError; end
+  class DuplicateImage < ImageError; end
 end
