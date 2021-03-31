@@ -80,16 +80,16 @@ class Volcanic::Imageman::V1::Image
 
   def resolve_file(attachable, declared_type = nil)
     att = attachable
-    name = nil
-    type = declared_type
+    filename = nil
+    content_type = declared_type
 
     if attachable.is_a?(Hash)
       att = attachable.fetch(:io)
-      name = attachable[:filename]
-      type = attachable[:content_type] || declared_type
+      filename = attachable[:filename]
+      content_type = attachable[:content_type] || declared_type
     end
 
-    Volcanic::Imageman::V1::Attachable.new(att, filename: name, content_type: type)
+    Volcanic::Imageman::V1::Attachable.new(att, filename: filename, content_type: content_type)
   end
 
   def default_body

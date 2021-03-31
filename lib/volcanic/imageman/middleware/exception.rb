@@ -13,13 +13,13 @@ module Volcanic::Imageman::Middleware
       @app.call(request_env).on_complete do |response|
         status_code = response[:status].to_i
         case status_code
-        when 400
+        when 400..410
           error_code = standard_error(response)[:error_code]
-          raise Volcanic::Imageman::DuplicateImage, standard_error(response) if error_code == 1002
+          exception = Volcanic::Imageman::ImageError
+          exception = Volcanic::Imageman::DuplicateImage if status_code == 400 && error_code == 1002
+          exception = Volcanic::Imageman::ImageNotFound if status_code == 404
 
-          raise Volcanic::Imageman::ImageError, standard_error(response)
-        when 401..410
-          raise Volcanic::Imageman::ImageError, standard_error(response)
+          raise exception, standard_error(response)
         when 500
           raise Volcanic::Imageman::ServerError, server_error(response)
         end

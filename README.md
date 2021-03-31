@@ -17,6 +17,20 @@ And then execute:
 
 ## Usage
 
+### Configuration
+```ruby
+Volcanic::Imageman.configure do |config|
+  # Imageman domain url
+  config.domain_url = ENV['IMAGEMAN_DOMAIN']
+  # Asset image url
+  config.asset_image_url = ENV['ASSET_IMAGE_URL']
+  # Service name.
+  config.service = ENV['APP_NAME']
+  # String of authentication key, also accept callable function.
+  config.service = ENV['API_KEY'] || -> { SomeMethod.get_api_key }
+end
+```
+
 ### Image
 Creating an Image
 ```ruby
@@ -95,6 +109,19 @@ image.persisted? # => true
 
 image = ::Image.create(attachable: file, reference: reference)
 image.persisted? #=> true
+```
+
+## exception
+
+```ruby
+::Image.create(attachable: file, reference: reference)
+# => raise Volcanic::Imageman::DuplicateImage if duplicates reference
+# => raise Volcanic::Imageman::ImageError if validation error
+
+::Image.fetch_by(reference: reference)
+# => raise Volcanic::Imageman::ImageNotFound if 404
+
+# => raise Volcanic::Imageman::ServerError if Server Error 500
 ```
 
 ## Contributing

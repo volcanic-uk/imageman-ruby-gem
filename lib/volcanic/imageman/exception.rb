@@ -11,4 +11,6 @@ module Volcanic::Imageman
   class ImageError < ImagemanError; end
 
   class DuplicateImage < ImageError; end
+
+  class ImageNotFound < ImageError; end
 end
