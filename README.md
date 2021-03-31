@@ -50,9 +50,9 @@ image.inspect # => { :uuid, :reference, :name, :versions, :creator_subject, :cac
 reference = ::Reference.new(name: 'image.jpeg', source: 'user-model', **opts)
 ::Image.create(attachable: file, reference: reference)
 
-# Hash for +attachable+
-# for hash +io+ and +filename+ is required, and it always recommended to have the content_type
-file = { io: Tempfile.new('image.jpeg'), filename: 'image.jpeg', content_type: 'image/jpeg' }
+# for hashes object
+# minimum an open file +io+ and and +filename+, +content_type+ is recommended
+file = { io: Tempfile.new('image.jpeg').open, filename: 'image.jpeg', content_type: 'image/jpeg' }
 ::Image.create(attachable: file, reference: reference)
 
 # Imageman service are limited to only 6mb image file per request. By that this gem automatically handle
@@ -114,14 +114,21 @@ image.persisted? #=> true
 ## exception
 
 ```ruby
-::Image.create(attachable: file, reference: reference)
-# => raise Volcanic::Imageman::DuplicateImage if duplicates reference
-# => raise Volcanic::Imageman::ImageError if validation error
+::Image.create(attachable: file, reference: DUPLICATES_REFERENCE)
+# => raise Volcanic::Imageman::DuplicateImage
 
-::Image.fetch_by(reference: reference)
-# => raise Volcanic::Imageman::ImageNotFound if 404
+::Image.fetch_by(reference: NONE_EXISTS_REFERENCE)
+# => raise Volcanic::Imageman::ImageNotFound
 
-# => raise Volcanic::Imageman::ServerError if Server Error 500
+file = Tempfile.new('file.txt').tap { |file| file.write('some text...') }
+::Image.create(attachable: { io: file.open, filename: 'file.txt' }, reference: reference)
+# => raise Volcanic::Imageman::FileNotSupported
+
+# other validation error
+# => raise Volcanic::Imageman::ImageError
+
+# server error where it return 500
+# => raise Volcanic::Imageman::ServerError 
 ```
 
 ## Contributing

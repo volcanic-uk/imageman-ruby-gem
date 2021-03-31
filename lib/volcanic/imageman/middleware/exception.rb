@@ -15,11 +15,8 @@ module Volcanic::Imageman::Middleware
         case status_code
         when 400..410
           error_code = standard_error(response)[:error_code]
-          exception = Volcanic::Imageman::ImageError
-          exception = Volcanic::Imageman::DuplicateImage if status_code == 400 && error_code == 1002
-          exception = Volcanic::Imageman::ImageNotFound if status_code == 404
-
-          raise exception, standard_error(response)
+          exception = resolve_exception(error_code, status_code)
+          raise(exception || Volcanic::Imageman::ImageError, standard_error(response))
         when 500
           raise Volcanic::Imageman::ServerError, server_error(response)
         end
@@ -27,6 +24,20 @@ module Volcanic::Imageman::Middleware
     end
 
     private
+
+    def resolve_exception(error_code, status_code)
+      case status_code
+      when 400
+        case error_code
+        when 1002
+          Volcanic::Imageman::DuplicateImage
+        when 1003
+          Volcanic::Imageman::FileNotSupported
+        end
+      when 404
+        Volcanic::Imageman::ImageNotFound
+      end
+    end
 
     def standard_error(response)
       body = JSON.parse(response[:body])
