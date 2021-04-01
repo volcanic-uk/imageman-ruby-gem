@@ -6,6 +6,7 @@ require 'forwardable'
 
 Dir[File.join(__dir__, 'middleware', '*.rb')].sort.each { |file| require file }
 
+# TODO: need to have spec file
 module Volcanic::Imageman
   # connection
   class Connection

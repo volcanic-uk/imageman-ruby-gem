@@ -3,6 +3,7 @@
 require 'base64'
 require 'marcel'
 
+# TODO: need to have spec file
 # Image class
 class Volcanic::Imageman::V1::Attachable
   attr_reader :attachable

@@ -3,6 +3,7 @@
 require 'forwardable'
 require 'digest'
 
+# TODO: need to have spec file
 # Reference
 class Volcanic::Imageman::V1::Reference
   extend Forwardable
