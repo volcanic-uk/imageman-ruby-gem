@@ -104,7 +104,7 @@ class Volcanic::Imageman::V1::Image
   def exceed_byte_size(size)
     return false unless size.is_a? Integer
 
-    size >= megabytes_of(6)
+    size > megabytes_of(5)
   end
 
   def megabytes_of(number)
