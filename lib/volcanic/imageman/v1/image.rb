@@ -40,8 +40,8 @@ class Volcanic::Imageman::V1::Image
     file = attachable.nil? ? nil : resolve_file(attachable, declared_type)
     body = { reference: nil, path: persisted_path, **opts }
     if using_signed_url || exceed_byte_size(file&.size_at_base64)
-      path = fetch_signed_url(type: file&.content_type, **body)
-      create_update_to_signed_url(path, file)
+      signed_url = build_signed_url(type: file&.content_type, **body)
+      signed_url.upload file
     else
       create_or_update(path: persisted_path, file: file&.read_as_base64, **body)
     end
@@ -56,8 +56,8 @@ class Volcanic::Imageman::V1::Image
   def _upload_and_create(attachable, using_signed_url: false, declared_type: nil)
     file = resolve_file(attachable, declared_type)
     if using_signed_url || exceed_byte_size(file.size_at_base64)
-      path = fetch_signed_url(type: file.content_type)
-      create_update_to_signed_url(path, file)
+      signed_url = build_signed_url(type: file.content_type)
+      signed_url.upload file
     else
       create_or_update(file: file.read_as_base64)
     end
@@ -111,8 +111,10 @@ class Volcanic::Imageman::V1::Image
     number * 1024 * 1024
   end
 
-  def fetch_signed_url(type:, **body)
-    create_or_update(sign_url_enable: true, content_type: type, **body).body[:signed_url]
+  def build_signed_url(type:, **body)
+    res = create_or_update(sign_url_enable: true, content_type: type, **body)
+    args = res.body[:signed_url] || {}
+    Volcanic::Imageman::V1::S3SignedUrl.new(url: args[:url], **args[:fields])
   end
 
   def create_or_update(path: API_PATH, file: nil, **body)
@@ -120,12 +122,5 @@ class Volcanic::Imageman::V1::Image
       req.body = default_body.merge(file: file, **body).compact
     end
     response.tap { |res| write_self(serialize_img(res.body)) }
-  end
-
-  def create_update_to_signed_url(path, file)
-    conn.put(path) do |req|
-      req.headers = { 'Content-Type' => file.content_type }
-      req.body = file.read
-    end
   end
 end

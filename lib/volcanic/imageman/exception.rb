@@ -15,4 +15,8 @@ module Volcanic::Imageman
   class ImageNotFound < ImageError; end
 
   class FileNotSupported < ImageError; end
+
+  class Forbidden < ImageError; end
+
+  class S3SignedUrlError < ImageError; end
 end
