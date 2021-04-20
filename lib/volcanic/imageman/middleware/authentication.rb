@@ -29,9 +29,7 @@ module Volcanic::Imageman::Middleware
     private
 
     def auth_key
-      @auth_key ||= begin
-        "Bearer #{authentication.respond_to?('call') ? authentication.call : authentication}"
-      end
+      @auth_key ||= "Bearer #{authentication.respond_to?('call') ? authentication.call : authentication}"
     end
   end
 end
