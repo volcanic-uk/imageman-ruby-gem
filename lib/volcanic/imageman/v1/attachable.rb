@@ -3,6 +3,7 @@
 require 'base64'
 require 'marcel'
 
+# TODO: need to have spec file
 # Image class
 class Volcanic::Imageman::V1::Attachable
   attr_reader :attachable
@@ -32,14 +33,10 @@ class Volcanic::Imageman::V1::Attachable
   end
 
   def filename
-    @filename ||= begin
-      attachable.original_filename if attachable.respond_to?('original_filename')
-    end
+    @filename ||= attachable.original_filename if attachable.respond_to?('original_filename')
   end
 
   def content_type
-    @content_type ||= begin
-      Marcel::MimeType.for File.open(attachable.path), name: filename
-    end
+    @content_type ||= Marcel::MimeType.for File.open(attachable.path), name: filename
   end
 end

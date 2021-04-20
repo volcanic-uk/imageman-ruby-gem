@@ -17,6 +17,7 @@ Gem::Specification.new do |spec|
   spec.files         = Dir.glob 'lib/**/*.rb'
   spec.require_paths = %w(lib)
 
+  spec.add_dependency 'activesupport', '~> 6.0.3.4'
   spec.add_dependency 'faraday', '~> 1.0'
   spec.add_dependency 'faraday_middleware', '~> 1.0'
   spec.add_dependency 'marcel', '~> 0.3.1'

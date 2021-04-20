@@ -20,6 +20,7 @@ RSpec.describe Volcanic::Imageman::V1::Image do
   let(:file) { Volcanic::Imageman::V1::Attachable }
   let(:conn) { Volcanic::Imageman::Connection }
   let(:response) { double 'response' }
+  let(:api_path) {}
   let(:signed_url) {}
   let(:response_body) do
     {
@@ -34,11 +35,17 @@ RSpec.describe Volcanic::Imageman::V1::Image do
   let(:server_error) { Volcanic::Imageman::ServerError }
   let(:duplicates_error) { Volcanic::Imageman::DuplicateImage }
 
-  before do
+  before do |test|
     allow(response).to receive(:body).and_return(response_body)
-    allow_any_instance_of(conn).to receive(:get).with(anything).and_return(response)
-    allow_any_instance_of(conn).to receive(:post).with(anything).and_return(response)
-    allow_any_instance_of(conn).to receive(:delete).with(anything).and_return(response)
+    if test.metadata[:using_signed_url]
+      allow_any_instance_of(file).to receive(:size_at_base64).and_return(three_mb)
+      allow_any_instance_of(conn).to receive(:post).with(api_path).and_return(response)
+      allow_any_instance_of(conn).to receive(:post).with(signed_url[:url]).and_return(true)
+    else
+      allow_any_instance_of(conn).to receive(:get).with(anything).and_return(response)
+      allow_any_instance_of(conn).to receive(:post).with(anything).and_return(response)
+      allow_any_instance_of(conn).to receive(:delete).with(anything).and_return(response)
+    end
   end
 
   describe 'create' do
@@ -112,12 +119,9 @@ RSpec.describe Volcanic::Imageman::V1::Image do
       it('raises an exception') { expect { subject }.to raise_error server_error }
     end
 
-    context 'when image exceed limit' do
-      let(:signed_url) { 'http://s3-signed-url' }
-      before do
-        allow_any_instance_of(file).to receive(:size_at_base64).and_return(six_mb)
-        allow_any_instance_of(conn).to receive(:put).with(signed_url).and_return(true)
-      end
+    context 'when image exceed limit', :using_signed_url do
+      let(:api_path) { '/api/v1/images' }
+      let(:signed_url) { { url: 'http://s3-signed-url', fields: { some_keys: '1234' } } }
 
       it('return an instance') { expect(subject).to be_an_instance_of(described_class) }
     end
@@ -188,7 +192,7 @@ RSpec.describe Volcanic::Imageman::V1::Image do
 
   describe '#update' do
     let(:base64_string) { attachable }
-    subject { instance.update(attachable: base64_string) }
+    subject { instance.update(base64_string) }
 
     context 'when missing both uuid and reference (not persisted)' do
       let(:instance) { described_class.new }
@@ -200,20 +204,17 @@ RSpec.describe Volcanic::Imageman::V1::Image do
       it('return true') { is_expected.to be true }
     end
 
-    context 'when image exceed limit' do
-      let(:signed_url) { 'http://s3-signed-url' }
-      before do
-        allow_any_instance_of(file).to receive(:size_at_base64).and_return(six_mb)
-        allow_any_instance_of(conn).to receive(:put).with(signed_url).and_return(true)
-      end
-
+    context 'when image exceed limit', :using_signed_url do
+      let(:instance) { described_class.new(uuid: mock_uuid) }
+      let(:api_path) { '/api/v1/images/uuid' }
+      let(:signed_url) { { url: 'http://s3-signed-url', fields: { some_keys: '1234' } } }
       it('return true') { is_expected.to be true }
     end
   end
 
   private
 
-  def six_mb
-    6 * 1024 * 1024
+  def three_mb
+    3 * 1024 * 1024
   end
 end

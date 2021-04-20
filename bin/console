@@ -4,14 +4,14 @@
 require 'bundler/setup'
 require 'volcanic/imageman'
 require 'pry'
-# require 'securerandom'
-# require 'base64'
+require 'securerandom'
+require 'base64'
 
-# Volcanic::Imageman.configure do |config|
-#   config.service = 'test-service'
-#   config.domain_url = 'http://localhost:8006'
-#   config.authentication = "" # add auth token here
-# end
+Volcanic::Imageman.configure do |config|
+  config.service = 'test-service'
+  config.domain_url = 'http://127.0.0.1:8006'
+  config.authentication = "" # add auth token here
+end
 
 def reload!(print = true)
   puts 'Reloading ...' if print
