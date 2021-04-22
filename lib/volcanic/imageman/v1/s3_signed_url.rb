@@ -14,7 +14,7 @@ class Volcanic::Imageman::V1::S3SignedUrl
     raise ArgumentError, 'Expect an url, got nil' if url.nil?
 
     @url = url
-    @args = fields
+    @fields = fields
   end
 
   def build_body(**opts)
