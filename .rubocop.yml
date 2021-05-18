@@ -16,5 +16,13 @@ Metrics/BlockLength:
 Metrics/ParameterLists:
   Max: 6
 
+Metrics/ClassLength:
+  Max: 110
+
 Style/ClassAndModuleChildren:
   Enabled: false
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    '%i':    '()'
+    '%w':    '()'
