@@ -21,6 +21,7 @@ module Volcanic::Imageman
       @conn = Faraday.new(url: domain_url) do |conn|
         conn.request :json
         conn.request :multipart # to support form data req on s3 singed url
+        conn.request :retry, retry_options
         conn.response :json, content_type: /\bjson$/, parser_options: { symbolize_names: true }
         conn.adapter Faraday.default_adapter
 
@@ -30,6 +31,17 @@ module Volcanic::Imageman
         conn.use Volcanic::Imageman::Middleware::RequestId
         conn.use Volcanic::Imageman::Middleware::Exception
       end
+    end
+
+    private
+
+    def retry_options
+      {
+        max: 3,
+        interval: 0.5,
+        interval_randomness: 0.5,
+        backoff_factor: 2
+      }
     end
   end
 end
