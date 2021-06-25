@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'volcanic/imageman/version'
+
 RSpec.describe Volcanic::Imageman::Connection do
   let(:stubs)  { Faraday::Adapter::Test::Stubs.new }
   let(:middleware) {}
@@ -27,7 +29,7 @@ RSpec.describe Volcanic::Imageman::Connection do
   describe 'when using User-Agent middleware' do
     let(:middleware) { Volcanic::Imageman::Middleware::UserAgent }
     it('should content User-Agent header') do
-      expect(subject.env[:request_headers]).to eq({ 'User-Agent' => 'Imageman v0.1.0' })
+      expect(subject.env[:request_headers]).to eq({ 'User-Agent' => "Imageman v#{Volcanic::Imageman::VERSION}" })
     end
   end
 
