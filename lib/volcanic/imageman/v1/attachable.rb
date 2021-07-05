@@ -11,7 +11,7 @@ class Volcanic::Imageman::V1::Attachable
   def initialize(attachable, filename: nil, content_type: nil)
     raise ArgumentError, 'Expect value of attachable, got nil' if attachable.nil?
 
-    @attachable = attachable.respond_to?('read') ? attachable : Tempfile.new(attachable)
+    @attachable = attachable.respond_to?('path') ? attachable : Tempfile.new(attachable)
     @filename = filename
     @content_type = content_type
   end

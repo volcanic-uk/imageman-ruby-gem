@@ -30,6 +30,7 @@ module Volcanic::Imageman::Middleware
 
     private
 
+    # rubocop:disable Metrics/CyclomaticComplexity
     def resolve_exception(error_code, status_code, env)
       return Volcanic::Imageman::S3SignedUrlError unless domain_url?(env[:url])
 
@@ -47,6 +48,7 @@ module Volcanic::Imageman::Middleware
         Volcanic::Imageman::ImageNotFound
       end
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def build_standard_error(body)
       error = {
