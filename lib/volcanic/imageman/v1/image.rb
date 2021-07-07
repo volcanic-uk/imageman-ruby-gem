@@ -49,7 +49,7 @@ class Volcanic::Imageman::V1::Image
   end
 
   def persisted?
-    !!(uuid || reference)
+    !(uuid || reference).nil?
   end
 
   # Dont use this method, use class method +create+ instead
