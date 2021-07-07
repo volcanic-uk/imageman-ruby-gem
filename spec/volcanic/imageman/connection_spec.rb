@@ -29,7 +29,7 @@ RSpec.describe Volcanic::Imageman::Connection do
   describe 'when using User-Agent middleware' do
     let(:middleware) { Volcanic::Imageman::Middleware::UserAgent }
     it('should content User-Agent header') do
-      expect(subject.env[:request_headers]).to eq({ 'User-Agent' => "Imageman v#{Volcanic::Imageman::VERSION}" })
+      expect(subject.env[:request_headers]).to eq('User-Agent' => "Imageman v#{Volcanic::Imageman::VERSION}")
     end
   end
 

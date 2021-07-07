@@ -11,9 +11,9 @@ class Volcanic::Imageman::V1::Attachable
   def initialize(attachable, filename: nil, content_type: nil)
     raise ArgumentError, 'Expect value of attachable, got nil' if attachable.nil?
 
-    @attachable = attachable.respond_to?('read') ? attachable : Tempfile.new(attachable)
     @filename = filename
     @content_type = content_type
+    @attachable = attachable.respond_to?('path') ? attachable : create_readable_file(attachable)
   end
 
   def read
@@ -38,5 +38,14 @@ class Volcanic::Imageman::V1::Attachable
 
   def content_type
     @content_type ||= Marcel::MimeType.for File.open(attachable.path), name: filename
+  end
+
+  private
+
+  def create_readable_file(value)
+    Tempfile.open do |tmp|
+      tmp.write value
+      tmp
+    end
   end
 end
