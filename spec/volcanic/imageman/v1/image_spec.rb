@@ -94,6 +94,11 @@ RSpec.describe Volcanic::Imageman::V1::Image do
       it('return an instance') { expect(subject).to be_an_instance_of(described_class) }
     end
 
+    context 'should get latest version' do
+      let(:response_body) { { version: 1 } }
+      its(:version) { should eq 1 }
+    end
+
     context 'when return with versions details' do
       let(:mock_versions) { { id: 1, version_id: 1, s3_key: 's3key' } }
       let(:response_body) { { versions: [mock_versions] } }
