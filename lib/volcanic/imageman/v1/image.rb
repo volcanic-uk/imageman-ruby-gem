@@ -11,7 +11,7 @@ class Volcanic::Imageman::V1::Image
   extend Volcanic::Imageman::Image::ClassMethod
 
   UPDATABLE_ATTR = %i(name cacheable cache_duration).freeze
-  NON_UPDATABLE_ATTR = %i(id reference uuid creator_subject versions created_at updated_at).freeze
+  NON_UPDATABLE_ATTR = %i(id reference uuid creator_subject version versions created_at updated_at).freeze
   API_PATH = '/api/v1/images'
 
   attr_accessor(*UPDATABLE_ATTR)
