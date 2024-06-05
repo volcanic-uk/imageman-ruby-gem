@@ -9,7 +9,6 @@ Gem::Specification.new do |spec|
   spec.version       = Volcanic::Imageman::VERSION
   spec.authors       = %w(Farid)
   spec.email         = %w(faridul.azmi@theaccessgroup.com)
-  spec.required_ruby_version = '>= 3.1.6'
 
   spec.summary       = 'Ruby gem client for Volcanic Imageman'
   spec.description   = spec.summary
