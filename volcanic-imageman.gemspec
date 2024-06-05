@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activesupport'
   spec.add_dependency 'faraday', '~> 1.0'
   spec.add_dependency 'faraday_middleware', '~> 1.0'
-  spec.add_dependency 'marcel', '~> 1.0.0'
+  spec.add_dependency 'marcel'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'pry'
