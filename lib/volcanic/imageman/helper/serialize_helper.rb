@@ -9,7 +9,7 @@ module Volcanic::Imageman
         image[:uuid] = image.delete :UUID
         image[:name] = image.delete :fileName
         image[:versions] = image[:versions]&.map do |ver|
-          Volcanic::Imageman::V1::Version.new(ver)
+          Volcanic::Imageman::V1::Version.new(**ver)
         end
       end
     end

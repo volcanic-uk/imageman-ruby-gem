@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.version       = Volcanic::Imageman::VERSION
   spec.authors       = %w(Farid)
   spec.email         = %w(faridul.azmi@theaccessgroup.com)
-  spec.required_ruby_version = '~> 2.5'
+  spec.required_ruby_version = '~> 3.1'
 
   spec.summary       = 'Ruby gem client for Volcanic Imageman'
   spec.description   = spec.summary
@@ -27,5 +27,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rspec-its', '~> 1.3'
-  spec.add_development_dependency 'rubocop', '~> 0.57.2'
+  spec.add_development_dependency 'rubocop', '~> 1.22.3'
 end
