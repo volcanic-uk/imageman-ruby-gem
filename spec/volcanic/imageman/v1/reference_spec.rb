@@ -20,12 +20,12 @@ RSpec.describe Volcanic::Imageman::V1::Reference do
   its(:url) { should eq build_url(mock_name, mock_source, mock_opts) }
 
   describe 'hash' do
-    subject { described_class.hash(attrs) }
+    subject { described_class.hash(**attrs) }
     it { is_expected.to eq build(mock_name, mock_source, mock_opts) }
   end
 
   describe 'hash_with_url' do
-    subject { described_class.hash_with_url(attrs) }
+    subject { described_class.hash_with_url(**attrs) }
     it { is_expected.to eq build_url(mock_name, mock_source, mock_opts) }
   end
 

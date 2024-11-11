@@ -133,9 +133,10 @@ RSpec.describe Volcanic::Imageman::V1::Image do
   end
 
   describe 'fetch_by' do
-    subject { described_class.fetch_by(attr) }
+    subject { described_class.fetch_by(**attr) }
 
     context 'missing reference or uuid' do
+      subject { described_class.fetch_by(attr) }
       let(:attr) { nil }
       it('raises an exception') { expect { subject }.to raise_error(ArgumentError) }
     end
