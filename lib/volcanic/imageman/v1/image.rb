@@ -18,14 +18,14 @@ class Volcanic::Imageman::V1::Image
   attr_reader(*NON_UPDATABLE_ATTR)
 
   def initialize(**attrs)
-    write_self(attrs)
+    write_self(**attrs)
   end
 
   def reload
     return false unless persisted?
 
     res = conn.get(persisted_path)
-    write_self(serialize_img(res.body))
+    write_self(**serialize_img(**res.body))
   end
 
   def delete
@@ -121,6 +121,6 @@ class Volcanic::Imageman::V1::Image
     response = conn.post(path) do |req|
       req.body = default_body.merge(file: file, **body).compact
     end
-    response.tap { |res| write_self(serialize_img(res.body)) }
+    response.tap { |res| write_self(**serialize_img(**res.body)) }
   end
 end
