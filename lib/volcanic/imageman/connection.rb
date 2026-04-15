@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'faraday'
-require 'faraday_middleware'
 require 'forwardable'
 
 Dir[File.join(__dir__, 'middleware', '*.rb')].sort.each { |file| require file }
