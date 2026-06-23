@@ -1,7 +1,19 @@
 # frozen_string_literal: true
 
 require 'faraday'
-require 'faraday_middleware'
+require 'faraday/multipart'
+
+begin
+  require 'faraday/retry'
+rescue LoadError
+  # Faraday 1.x has retry built-in
+end
+
+begin
+  require 'faraday_middleware'
+rescue LoadError
+  # Faraday 2.x has JSON middleware built-in
+end
 require 'forwardable'
 
 Dir[File.join(__dir__, 'middleware', '*.rb')].sort.each { |file| require file }

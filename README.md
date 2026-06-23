@@ -131,6 +131,16 @@ file = Tempfile.new('file.txt').tap { |file| file.write('some text...') }
 # => raise Volcanic::Imageman::ServerError 
 ```
 
+## Faraday Compatibility
+
+This gem supports both Faraday 1.x and Faraday 2.x.
+
+- **Faraday 1.x users**: Add `faraday_middleware` to your Gemfile:
+  ```ruby
+  gem 'faraday_middleware', '~> 1.0'
+  ```
+- **Faraday 2.x users**: `faraday-multipart` and `faraday-retry` are automatically included as dependencies. No additional gems are needed.
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/Imageman-ruby-gem.

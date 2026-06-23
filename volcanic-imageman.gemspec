@@ -18,11 +18,13 @@ Gem::Specification.new do |spec|
   spec.require_paths = %w(lib)
 
   spec.add_dependency 'activesupport', '>= 6.0.6.1'
-  spec.add_dependency 'faraday', '~> 1.0'
-  spec.add_dependency 'faraday_middleware', '~> 1.0'
+  spec.add_dependency 'faraday', '>= 1.0', '< 3'
+  spec.add_dependency 'faraday-multipart', '>= 1.0'
+  spec.add_dependency 'faraday-retry', '>= 1.0'
   spec.add_dependency 'marcel', '~> 1.0.0'
 
   spec.add_development_dependency 'bundler'
+  spec.add_development_dependency 'faraday_middleware', '~> 1.0'
   spec.add_development_dependency 'pry'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
